@@ -5,19 +5,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
   "dependencies": {
-    "next": "15.3.4",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "recharts": "2.15.3"
+    "next": "15.5.16",
+    "react": "19.1.2",
+    "react-dom": "19.1.2",
+    "recharts": "2.15.4"
   },
   "devDependencies": {
     "@types/node": "22.15.30",
-    "@types/react": "19.0.12",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.4",
     "typescript": "5.8.3"
   }
 }
