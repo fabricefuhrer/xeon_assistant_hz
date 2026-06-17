@@ -128,7 +128,6 @@ function workloadFit(cpu: Cpu, workload: Workload) {
 }
 
 function systemCompatible(cpu: Cpu, filters: Filters) {
-function systemCompatible(cpu: Cpu, filters: Filters) {
   if (filters.system === "any") return true;
 
   // 63XX -> ST50 only
