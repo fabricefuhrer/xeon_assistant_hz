@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip } from "recharts";
 
-type Segment = "extended" | "mainstream" | "specialised" | "tce";
+type Segment = "Extended" | "Mainstream" | "Specialised" | "TCE";
 type CoreType = "P-Cores" | "E-Cores";
 type Workload = "any" | "hpc" | "ai" | "database" | "web" | "cloud" | "edge" | "storage" | "tower";
 type SystemModel = "any" | "st50-v3" | "sr630-v4" | "sr650-v4" | "sr680a-v4" | "sr850-v4" | "sr860-v4";
