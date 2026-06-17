@@ -51,7 +51,7 @@ const cpuCatalog: Cpu[] = [
   { sku: "6505P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 12, maxTurboGHz: 4.1, baseGHz: 2.2, cacheMB: 48, tdpW: 150, costUsd: 435, chips: 2, specInt2017: 286, maxScalability: "2S", segment: "TCE" },
   { sku: "6507P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 8, maxTurboGHz: 4.3, baseGHz: 3.5, cacheMB: 48, tdpW: 150, costUsd: 551, chips: 2, specInt2017: 210, maxScalability: "2S", segment: "Mainstream" },
   { sku: "6511P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 16, maxTurboGHz: 4.2, baseGHz: 2.3, cacheMB: 72, tdpW: 150, costUsd: 640, chips: 1, specInt2017: 195, maxScalability: "1S", segment: "Extended" },
-  { sku: "6515P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 16, maxTurboGHz: 3.8, baseGHz: 2.3, cacheMB: 72, tdpW: 150, costUsd: 515, chips: 2, specInt2017: 373, maxScalability: "2S", segment: TCE" },
+  { sku: "6515P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 16, maxTurboGHz: 3.8, baseGHz: 2.3, cacheMB: 72, tdpW: 150, costUsd: 515, chips: 2, specInt2017: 373, maxScalability: "2S", segment: "TCE" },
   { sku: "6517P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 16, maxTurboGHz: 4.2, baseGHz: 3.2, cacheMB: 72, tdpW: 190, costUsd: 850, chips: 2, specInt2017: 388, maxScalability: "2S", segment: "TCE" },
   { sku: "6520P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 24, maxTurboGHz: 4.0, baseGHz: 2.4, cacheMB: 144, tdpW: 210, costUsd: 950, chips: 2, specInt2017: 522, maxScalability: "2S", segment: "TCE" },
   { sku: "6521P", family: "Xeon 6500", codename: "Granite Rapids", coreType: "P-Cores", cores: 24, maxTurboGHz: 4.1, baseGHz: 2.6, cacheMB: 144, tdpW: 225, costUsd: 900, chips: 1, specInt2017: 296, maxScalability: "1S", segment: "Extended" },
@@ -85,7 +85,7 @@ const cpuCatalog: Cpu[] = [
 
 const systems: Record<SystemModel, { label: string; maxSockets: number; tower?: boolean; allowedSegments?: Segment[]; allowE: boolean; maxTdp?: number }> = {
   any: { label: "Any System", maxSockets: 4, allowE: true },
-  "st50-v3": { label: "ThinkSystem ST50 V3", maxSockets: 1, tower: true, allowedSegments: ["tce"], allowE: false, maxTdp: 125 },
+  "st50-v3": { label: "ThinkSystem ST50 V3", maxSockets: 1, tower: true, allowedSegments: ["TCE"], allowE: false, maxTdp: 125 },
   "sr630-v4": { label: "ThinkSystem SR630 V4", maxSockets: 2, allowE: true, maxTdp: 350 },
   "sr650-v4": { label: "ThinkSystem SR650 V4", maxSockets: 2, allowE: false, maxTdp: 350 },
   "sr680a-v4": { label: "ThinkSystem SR680a V4", maxSockets: 2, allowE: false, maxTdp: 350 },
@@ -120,7 +120,7 @@ function normalize(v: number, min: number, max: number) { return max === min ? 6
 
 function workloadFit(cpu: Cpu, workload: Workload) {
   if (workload === "any") return 1;
-  if (workload === "tower") return cpu.segment === "tce" ? 1.35 : 0.2;
+  if (workload === "tower") return cpu.segment === "TCE" ? 1.35 : 0.2;
   if (["hpc", "ai", "database"].includes(workload)) return cpu.coreType === "P-Cores" ? 1.25 : 0.75;
   if (["web", "cloud"].includes(workload)) return cpu.coreType === "E-Cores" ? 1.35 : 0.75;
   if (["edge", "storage"].includes(workload)) return cpu.tdpW <= 250 ? 1.18 : 0.9;
@@ -175,7 +175,7 @@ function allowedByFilters(cpu: Cpu, filters: Filters) {
   if (filters.scalability !== "any" && cpu.maxScalability !== filters.scalability) return false;
   if (filters.socket !== "any" && cpu.chips !== Number(filters.socket)) return false;
 
-  if (filters.workload === "tower" && cpu.segment !== "tce") return false;
+  if (filters.workload === "tower" && cpu.segment !== "TCE") return false;
   if (filters.workload === "hpc" && cpu.coreType !== "P-Cores") return false;
   if (filters.workload === "ai" && cpu.coreType !== "P-Cores") return false;
   if (["web", "cloud"].includes(filters.workload) && cpu.coreType !== "E-Cores") return false;
@@ -197,11 +197,11 @@ function scoreCpu(cpu: Cpu, filters: Filters) {
 
   if (filters.workload === "database") score += cpu.cacheMB * 0.4 + turbo * 30;
   if (filters.workload === "hpc") score += spec * 0.25 + cores * 2;
-  if (filters.workload === "ai") score += turbo * 50 + (cpu.segment === "extended" ? 80 : 0);
+  if (filters.workload === "ai") score += turbo * 50 + (cpu.segment === "Extended" ? 80 : 0);
   if (filters.workload === "web" || filters.workload === "cloud") score += cores * 7 + efficiency * 120;
   if (filters.workload === "edge") score += cpu.tdpW <= 250 ? 160 : -80;
   if (filters.workload === "storage") score += socketCount(cpu) >= 2 ? 80 : 0;
-  if (filters.workload === "tower") score += cpu.segment === "tce" ? 300 : -500;
+  if (filters.workload === "tower") score += cpu.segment === "TCE" ? 300 : -500;
 
   return Math.round(score * fit);
 }
@@ -293,8 +293,8 @@ export default function Page() {
 
     <section className="dashboard" style={{ display: "grid", gridTemplateColumns: "320px 1fr 1.55fr 1.25fr", gap: 8 }}>
       <Panel><div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(97,145,175,.25)", display: "flex", justifyContent: "space-between" }}><b>FILTERS</b><button onClick={() => { setPending(defaultFilters); setFilters(defaultFilters); }} style={{ background: "transparent", border: 0, color: "#18a8ff" }}>Reset All</button></div><div style={{ padding: 14 }}>
-        <Select label="Workload" value={pending.workload} onChange={v => setPending({ ...pending, workload: v as Workload, ...(v === "tower" ? { system: "st50-v3", segment: "tce" } : {}) })} opts={[["any", "Any Workload"], ["database", "Database & Analytics"], ["hpc", "HPC"], ["ai", "AI"], ["web", "Web & Microservices"], ["cloud", "Cloud Native"], ["edge", "Edge"], ["storage", "Infrastructure & Storage"], ["tower", "Tower"]]} />
-        <Select label="System" value={pending.system} onChange={v => setPending({ ...pending, system: v as SystemModel, ...(v === "st50-v3" ? { workload: "tower", segment: "tce" } : {}) })} opts={Object.entries(systems).map(([value, item]) => [value, item.label])} />
+        <Select label="Workload" value={pending.workload} onChange={v => setPending({ ...pending, workload: v as Workload, ...(v === "tower" ? { system: "st50-v3", segment: "TCE" } : {}) })} opts={[["any", "Any Workload"], ["database", "Database & Analytics"], ["hpc", "HPC"], ["ai", "AI"], ["web", "Web & Microservices"], ["cloud", "Cloud Native"], ["edge", "Edge"], ["storage", "Infrastructure & Storage"], ["tower", "Tower"]]} />
+        <Select label="System" value={pending.system} onChange={v => setPending({ ...pending, system: v as SystemModel, ...(v === "st50-v3" ? { workload: "tower", segment: "TCE" } : {}) })} opts={Object.entries(systems).map(([value, item]) => [value, item.label])} />
         {slider("Max System Budget (USD)", "maxBudget", 100, 60000, 100, fmtMoney(pending.maxBudget))}
         {slider("Min Avg Cores (P + E)", "minAvgCores", 0, 172, 1, String(pending.minAvgCores), "Applies to both P-Cores and E-Cores using the visible core count field.")}
         {slider("Max TDP / Socket (W)", "maxTdp", 50, 400, 5)}
