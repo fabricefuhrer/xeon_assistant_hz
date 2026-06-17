@@ -139,22 +139,41 @@ function systemCompatible(cpu: Cpu, filters: Filters) {
 }
 
 function allowedByFilters(cpu: Cpu, filters: Filters) {
+
+  // 63XX only for Tower workload
   if (cpu.family === "Xeon 6300" && filters.workload !== "tower") return false;
-  if (cpu.coreType === "E-Cores" && filters.system !== "sr630-v4") return false;
+
+  // P-Cores selector should only show 6500 and 6700 families
+  if (
+    filters.coreKind === "p" &&
+    !["Xeon 6500", "Xeon 6700"].includes(cpu.family)
+  ) return false;
+
+  // E-Cores only allowed on SR630 V4
+  if (
+    cpu.coreType === "E-Cores" &&
+    filters.system !== "sr630-v4"
+  ) return false;
+
   if (totalCost(cpu) > filters.maxBudget) return false;
   if (avgCores(cpu) < filters.minAvgCores) return false;
   if (cpu.tdpW > filters.maxTdp) return false;
   if (cpu.specInt2017 < filters.minSpec) return false;
+
   if (filters.coreKind === "p" && cpu.coreType !== "P-Cores") return false;
   if (filters.coreKind === "e" && cpu.coreType !== "E-Cores") return false;
+
   if (filters.segment !== "all" && cpu.segment !== filters.segment) return false;
   if (filters.scalability !== "any" && cpu.maxScalability !== filters.scalability) return false;
   if (filters.socket !== "any" && cpu.chips !== Number(filters.socket)) return false;
+
   if (filters.workload === "tower" && cpu.segment !== "tce") return false;
   if (filters.workload === "hpc" && cpu.coreType !== "P-Cores") return false;
   if (filters.workload === "ai" && cpu.coreType !== "P-Cores") return false;
   if (["web", "cloud"].includes(filters.workload) && cpu.coreType !== "E-Cores") return false;
+
   if (!systemCompatible(cpu, filters)) return false;
+
   return true;
 }
 
