@@ -153,7 +153,7 @@ function systemCompatible(cpu: Cpu, filters: Filters) {
 function allowedByFilters(cpu: Cpu, filters: Filters) {
 
   // 63XX only for Tower workload
-  if (cpu.family === "Xeon 6300" && filters.workload !== "tower") return false;
+  if (cpu.family === "Xeon 6300" && filters.system !== "st50-v3") return false;
 
   // P-Cores selector should only show 6500 and 6700 families
   if (
