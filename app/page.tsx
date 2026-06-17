@@ -128,14 +128,27 @@ function workloadFit(cpu: Cpu, workload: Workload) {
 }
 
 function systemCompatible(cpu: Cpu, filters: Filters) {
-  const system = systems[filters.system];
-  if (!system) return true;
-  if (system.tower && cpu.segment !== "tce") return false;
-  if (system.allowedSegments && !system.allowedSegments.includes(cpu.segment)) return false;
-  if (!system.allowE && cpu.coreType === "E-Cores") return false;
-  if (socketCount(cpu) > system.maxSockets) return false;
-  if (system.maxTdp && cpu.tdpW > system.maxTdp) return false;
-  return true;
+function systemCompatible(cpu: Cpu, filters: Filters) {
+  if (filters.system === "any") return true;
+
+  // 63XX -> ST50 only
+  if (cpu.family === "Xeon 6300") {
+    return filters.system === "st50-v3";
+  }
+
+  // E-Cores -> SR630 V4 only
+  if (cpu.coreType === "E-Cores") {
+    return filters.system === "sr630-v4";
+  }
+
+  // 65XX + 67XX P-Cores -> all rack servers
+  return [
+    "sr630-v4",
+    "sr650-v4",
+    "sr680a-v4",
+    "sr850-v4",
+    "sr860-v4"
+  ].includes(filters.system);
 }
 
 function allowedByFilters(cpu: Cpu, filters: Filters) {
@@ -150,10 +163,6 @@ function allowedByFilters(cpu: Cpu, filters: Filters) {
   ) return false;
 
   // E-Cores only allowed on SR630 V4
-  if (
-    cpu.coreType === "E-Cores" &&
-    filters.system !== "sr630-v4"
-  ) return false;
 
   if (totalCost(cpu) > filters.maxBudget) return false;
   if (avgCores(cpu) < filters.minAvgCores) return false;
