@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip } from "recharts";
 
-type Segment = "extended" | "mainstream" | "tce";
+type Segment = "extended" | "mainstream" | "specialised" | "tce";
 type CoreType = "P-Cores" | "E-Cores";
 type Workload = "any" | "hpc" | "ai" | "database" | "web" | "cloud" | "edge" | "storage" | "tower";
 type SystemModel = "any" | "st50-v3" | "sr630-v4" | "sr650-v4" | "sr680a-v4" | "sr850-v4" | "sr860-v4";
@@ -300,7 +300,7 @@ export default function Page() {
         {slider("Max TDP / Socket (W)", "maxTdp", 50, 400, 5)}
         {slider("Min SPECint2017", "minSpec", 0, 3000, 10)}
         <Select label="P-Cores / E-Cores" value={pending.coreKind} onChange={v => setPending({ ...pending, coreKind: v as Filters["coreKind"] })} opts={[["all", "All (P-Cores & E-Cores)"], ["p", "P-Cores only"], ["e", "E-Cores only"]]} />
-        <Select label="CPU Segment" value={pending.segment} onChange={v => setPending({ ...pending, segment: v as Filters["segment"] })} opts={[["all", "All (Extended + Mainstream + TCE)"], ["extended", "Extended CPU"], ["mainstream", "Mainstream CPU"], ["tce", "TCE"]]} />
+        <Select label="CPU Segment" value={pending.segment} onChange={v => setPending({ ...pending, segment: v as Filters["segment"] })} opts={[["all", "All (Extended + Mainstream + TCE)"], ["extended", "Extended CPU"], ["mainstream", "Mainstream CPU"], ["specialised", "Specialised"], ["tce", "TCE"]]} />
         <Select label="Max Scalability" value={pending.scalability} onChange={v => setPending({ ...pending, scalability: v as Filters["scalability"] })} opts={[["any", "Any"], ["1S", "1S"], ["2S", "2S"], ["4S", "4S"]]} />
         <Select label="Socket / Chipsets" value={pending.socket} onChange={v => setPending({ ...pending, socket: v as Filters["socket"] })} opts={[["any", "Any"], ["1", "1"], ["2", "2"], ["4", "4"]]} />
         <button onClick={() => setFilters(pending)} style={{ width: "100%", padding: "9px", border: 0, borderRadius: 4, background: "linear-gradient(180deg,#0878ff,#0758d8)", color: "white", fontWeight: 700, marginTop: 10 }}>Apply Filters</button>
