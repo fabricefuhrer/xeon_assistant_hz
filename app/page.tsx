@@ -139,6 +139,8 @@ function systemCompatible(cpu: Cpu, filters: Filters) {
 }
 
 function allowedByFilters(cpu: Cpu, filters: Filters) {
+  if (cpu.family === "Xeon 6300" && filters.workload !== "tower") return false;
+  if (cpu.coreType === "E-Cores" && filters.system !== "sr630-v4") return false;
   if (totalCost(cpu) > filters.maxBudget) return false;
   if (avgCores(cpu) < filters.minAvgCores) return false;
   if (cpu.tdpW > filters.maxTdp) return false;
