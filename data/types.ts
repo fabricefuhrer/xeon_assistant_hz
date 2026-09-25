@@ -15,4 +15,5 @@ export type Filters = {
   workload: Workload; system: SystemModel; minAvgCores: number;
   maxTdp: number; minSpec: number; coreKind: "all" | "p" | "e";
   segment: "all" | Segment;
+  sku: string; family: string; maxRcp: number; scalability: "all" | "1S" | "2S" | "4S";
 };
