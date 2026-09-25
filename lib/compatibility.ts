@@ -1,5 +1,6 @@
 import type { Cpu, Filters, SystemModel } from "@/data/types";
-import { avgCores, totalCost } from "./metrics";
+import { avgCores, maxSocketCount, totalCost } from "./metrics";
+import { systems } from "@/data/systems";
 
 const entrySystems: SystemModel[] = ["st50-v3", "sr250-v3"];
 const rackSystems: SystemModel[] = ["sr630-v4", "sr650-v4", "sr680a-v4", "sr850-v4", "sr860-v4"];
@@ -20,6 +21,8 @@ export function systemCompatible(cpu: Cpu, filters: Pick<Filters, "system">) {
 
 export function allowedByFilters(cpu: Cpu, filters: Filters) {
   if (!systemCompatible(cpu, filters)) return false;
+  const system = systems[filters.system];
+  if (system.maxTdp && cpu.tdpW > system.maxTdp) return false;
   if (totalCost(cpu) > filters.maxBudget) return false;
   if (avgCores(cpu) < filters.minAvgCores) return false;
   if (cpu.tdpW > filters.maxTdp) return false;
@@ -27,9 +30,7 @@ export function allowedByFilters(cpu: Cpu, filters: Filters) {
   if (filters.coreKind === "p" && cpu.coreType !== "P-Cores") return false;
   if (filters.coreKind === "e" && cpu.coreType !== "E-Cores") return false;
   if (filters.segment !== "all" && cpu.segment !== filters.segment) return false;
-  if (filters.scalability !== "any" && cpu.maxScalability !== filters.scalability) return false;
-  if (filters.socket !== "any" && cpu.chips !== Number(filters.socket)) return false;
-  if (filters.workload === "hpc-ai" && cpu.coreType !== "P-Cores") return false;
-  if (["web", "cloud"].includes(filters.workload) && cpu.coreType !== "E-Cores") return false;
+  if (filters.scalability !== "any" && maxSocketCount(cpu) < Number(filters.scalability.replace("S", ""))) return false;
+  if (filters.socket !== "any" && Number(filters.socket) > maxSocketCount(cpu)) return false;
   return true;
 }
