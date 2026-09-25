@@ -63,8 +63,13 @@ export default function Page() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({unit:"mm",format:"a4"});
     const q=scoreBreakdown(top,displayPool), qty=deal.serverQty*deal.socketsPerServer;
+    const imageData=async(src:string)=>{const res=await fetch(src);if(!res.ok)throw new Error("Unable to load "+src);const blob=await res.blob();return await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)})};
     let y=18; const line=(label:string,value:string)=>{doc.setFont("helvetica","bold");doc.text(label,16,y);doc.setFont("helvetica","normal");doc.text(value,62,y);y+=7};
-    doc.setFontSize(18);doc.setFont("helvetica","bold");doc.text("Xeon Deal Assistant",16,y);y+=8;doc.setFontSize(10);doc.setTextColor(80);doc.text("Deal Recommendation Summary",16,y);doc.setTextColor(0);y+=12;
+    // Branded PDF header: use the same Lenovo and Intel logo assets shown in the app.
+    doc.setFillColor(247,249,251);doc.roundedRect(12,10,186,29,2,2,"F");
+    try{const [lenovoLogo,intelLogo]=await Promise.all([imageData("/lenovo-logo.jpg"),imageData("/intel-logo.png")]);doc.addImage(lenovoLogo,"JPEG",16,15,31,9.5,undefined,"FAST");doc.addImage(intelLogo,"PNG",52,14.5,20.5,10,undefined,"FAST")}catch{/* Keep PDF generation available if a logo asset cannot be loaded. */}
+    doc.setDrawColor(205,214,221);doc.line(78,14,78,35);
+    doc.setFontSize(18);doc.setTextColor(20,31,40);doc.setFont("helvetica","bold");doc.text("Xeon Deal Assistant",84,22);doc.setFontSize(9.5);doc.setFont("helvetica","normal");doc.setTextColor(82,96,107);doc.text("Lenovo + Intel | Deal Recommendation Summary",84,29);doc.setTextColor(0);y=49;
     line("Customer",deal.customer||"-");line("Opportunity",deal.opportunity||"-");line("System",systems[filters.system].label);line("Workload",workloadLabel(filters.workload));line("Servers",String(deal.serverQty));line("CPUs / Server",String(deal.socketsPerServer));line("Total CPU Qty",String(qty));y+=3;
     doc.setFontSize(14);doc.setFont("helvetica","bold");doc.text(`Recommended: Intel Xeon ${top.sku}`,16,y);y+=9;doc.setFontSize(10);
     line("Top Choice Express",top.tce?"TCE":"Not TCE");line("Segment",top.segment);line("Core Type",top.coreType);line("Cores / CPU",String(top.cores));line("Max Turbo",`${top.maxTurboGHz} GHz`);line("TDP / CPU",`${top.tdpW} W`);line("SPECint2017",`${specBase(top).toLocaleString()} (${benchmarkSockets(top)} enabled chip${benchmarkSockets(top)>1?"s":""})`);line("Intel RCP / Unit",fmtMoney(top.costUsd));line("Intel RCP Investment",fmtMoney(top.costUsd*qty));y+=4;
