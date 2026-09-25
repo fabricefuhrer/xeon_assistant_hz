@@ -1,4 +1,4 @@
-export type Segment = "Extended" | "Mainstream" | "Specialised" | "TCE";
+export type Segment = "Extended" | "Mainstream" | "Specialised";
 export type CoreType = "P-Cores" | "E-Cores";
 export type Workload = "any" | "hpc-ai" | "database" | "web" | "cloud" | "storage";
 export type SystemModel = "any" | "st50-v3" | "sr250-v3" | "sr630-v4" | "sr650-v4" | "sr680a-v4" | "sr850-v4" | "sr860-v4";
@@ -6,12 +6,14 @@ export type SystemModel = "any" | "st50-v3" | "sr250-v3" | "sr630-v4" | "sr650-v
 export type Cpu = {
   sku: string; family: string; codename: string; coreType: CoreType; cores: number;
   maxTurboGHz: number; baseGHz: number; cacheMB: number; tdpW: number; costUsd: number;
-  chips: number; specInt2017: number; maxScalability: string; segment: Segment;
+  chips: number; specInt2017: number; maxScalability: string; segment: Segment; tce: boolean;
 };
 
+export type DealConfig = { customer: string; opportunity: string; serverQty: number; socketsPerServer: 1 | 2 | 4 };
+
 export type Filters = {
-  workload: Workload; system: SystemModel; maxBudget: number; minAvgCores: number;
+  workload: Workload; system: SystemModel; minAvgCores: number;
   maxTdp: number; minSpec: number; coreKind: "all" | "p" | "e";
-  segment: "all" | Segment; scalability: "any" | "1S" | "2S" | "4S";
-  socket: "any" | "1" | "2" | "4";
+  segment: "all" | Segment; tceOnly: boolean;
+  sku: string; family: string; maxRcp: number; scalability: "all" | "1S" | "2S" | "4S";
 };
