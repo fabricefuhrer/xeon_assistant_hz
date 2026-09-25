@@ -5,7 +5,7 @@ import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
 import { allowedByFilters, bestFallback } from "@/lib/compatibility";
-import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, totalCores, totalCost, totalTdp } from "@/lib/metrics";
+import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, perCpuSpec, totalCores, totalCost, totalTdp } from "@/lib/metrics";
 import { recommendationReasons, scoreBreakdown, scoreCpu, workloadLabel } from "@/lib/scoring";
 import { systems } from "@/data/systems";
 import { Header } from "@/components/Header";
@@ -38,13 +38,13 @@ export default function Page() {
     if (sortBy === "value") return perfDollar(b) - perfDollar(a);
     if (sortBy === "efficiency") return perfWatt(b) - perfWatt(a);
     if (sortBy === "price") return totalCost(a) - totalCost(b);
-    return b.specInt2017 - a.specInt2017;
+    return perCpuSpec(b) - perCpuSpec(a);
   }), [filters, sortBy, deal]);
 
   const fallback = filtered.length ? null : bestFallback(cpuCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
   const displayPool = filtered.length ? filtered : (fallback ? [fallback] : []);
   const top: Cpu | null = displayPool[0] || null;
-  const topPerformance = [...displayPool].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
+  const topPerformance = [...displayPool].sort((a, b) => perCpuSpec(b) - perCpuSpec(a)).slice(0, 5);
   const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
 
 
