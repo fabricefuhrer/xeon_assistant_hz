@@ -1,5 +1,5 @@
 import type { Cpu } from "@/data/types";
-import { perfDollar, perCpuSpec } from "@/lib/metrics";
+import { perfDollar, benchmarkSockets } from "@/lib/metrics";
 import { Panel, td, Title } from "./ui";
 
 function RankPanel({ title, color, rows, header }: { title: string; color: string; rows: string[][]; header: string }) {
@@ -8,6 +8,6 @@ function RankPanel({ title, color, rows, header }: { title: string; color: strin
 
 export function RankPanels({ filtered }: { filtered: Cpu[] }) {
   const bestValue = [...filtered].sort((a, b) => perfDollar(b) - perfDollar(a)).slice(0, 5);
-  const topPerformance = [...filtered].sort((a, b) => perCpuSpec(b) - perCpuSpec(a)).slice(0, 5);
-  return <div className="side-grid"><RankPanel title="Best Value (Performance / $)" color="#39ff5f" rows={bestValue.map(c => [c.sku, perfDollar(c).toFixed(3)])} header="SPECint2017 / $" /><RankPanel title="Top Performance (SPECint2017 / CPU)" color="#e15cff" rows={topPerformance.map(c => [c.sku, Math.round(perCpuSpec(c)).toLocaleString()])} header="SPECint2017 / CPU" /></div>;
+  const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
+  return <div className="side-grid"><RankPanel title="Best Value (Performance / $)" color="#39ff5f" rows={bestValue.map(c => [c.sku, perfDollar(c).toFixed(3)])} header="SPECint2017 / $" /><RankPanel title="Top Performance (Measured SPECint2017)" color="#e15cff" rows={topPerformance.map(c => [c.sku, `${c.specInt2017.toLocaleString()} (${benchmarkSockets(c)}S)`])} header="SPECint2017 (config)" /></div>;
 }
