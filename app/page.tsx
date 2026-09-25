@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from "react";
 import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
-import { allowedByFilters, closestCompatible } from "@/lib/compatibility";
+import { allowedByFilters, bestFallback } from "@/lib/compatibility";
 import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, totalCores, totalCost, totalTdp } from "@/lib/metrics";
 import { recommendationReasons, scoreBreakdown, scoreCpu, workloadLabel } from "@/lib/scoring";
 import { systems } from "@/data/systems";
@@ -42,10 +42,10 @@ export default function Page() {
     return b.specInt2017 - a.specInt2017;
   }), [filters, sortBy, deal]);
 
-  const top: Cpu | null = filtered.length ? filtered[0] : null;
-  const closest = !top ? closestCompatible(cpuCatalog,filters,deal) : [];
-  const relaxFilters=()=>{const next={...filters,minAvgCores:0,maxTdp:400,minSpec:0,coreKind:"all" as const,segment:"all" as const};setFilters(next);setPending(next)};
-  const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
+  const fallback = filtered.length ? null : bestFallback(cpuCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
+  const displayPool = filtered.length ? filtered : (fallback ? [fallback] : []);
+  const top: Cpu | null = displayPool[0] || null;
+  const topPerformance = [...displayPool].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
   const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
 
 
@@ -94,22 +94,23 @@ export default function Page() {
     <section className="dashboard-fixed">
       <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} deal={deal} />
       <div style={{ display: "grid", gap: 6 }}>
-        <Recommendation top={top} filters={filters} pool={filtered} deal={deal} onCompare={openCompare} />
+        <Recommendation top={top} filters={filters} pool={displayPool} deal={deal} onCompare={openCompare} />
         <CompatibilitySummary top={top} filters={filters} deal={deal} />
         {!top&&<NoExactMatch items={closest} deal={deal} onRelax={relaxFilters} />}
-        <CommercialAlternatives filtered={filtered} top={top} filters={filters} />
-        <DealWarnings top={top} filtered={filtered} filters={filters} deal={deal} />
+        <CommercialAlternatives filtered={displayPool} top={top} filters={filters} />
+        <DealWarnings top={top} filtered={displayPool} filters={filters} deal={deal} />
       </div>
       <div style={{ display: "grid", gap: 6 }}>
-        <KeyMetrics filtered={filtered} />
+        <KeyMetrics filtered={displayPool} />
 <RadarPanel top={top} topPerformance={topPerformance} />
-        <WhyNot pool={filtered} top={top} filters={filters} />
+        <WhyNot pool={displayPool} top={top} filters={filters} />
       </div>
-      <RankPanels filtered={filtered} />
+      <RankPanels filtered={displayPool} />
     </section>
+    {fallback&&<div className="fallback-note">No exact filter match. Showing the closest compatible CPU for the selected platform and deal configuration.</div>}
     <div className="action-bar"><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div>
-    <div ref={compareRef} className="compare-anchor"><CpuCompare pool={filtered} firstSku={leftSku || top?.sku || ""} secondSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} thirdSku={thirdSku} setFirstSku={setLeftSku} setSecondSku={setRightSku} setThirdSku={setThirdSku} /></div>
-    <CpuTable filtered={filtered} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
+    <div ref={compareRef} className="compare-anchor"><CpuCompare pool={displayPool} firstSku={leftSku || top?.sku || ""} secondSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} thirdSku={thirdSku} setFirstSku={setLeftSku} setSecondSku={setRightSku} setThirdSku={setThirdSku} /></div>
+    <CpuTable filtered={displayPool} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
 }
