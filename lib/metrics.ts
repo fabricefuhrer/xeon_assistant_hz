@@ -12,7 +12,7 @@ export function benchmarkSockets(cpu: Cpu) { return specResult(cpu.sku)?.enabled
 export function specBase(cpu: Cpu) { return specResult(cpu.sku)?.base ?? cpu.specInt2017; }
 export function benchmarkCost(cpu: Cpu) { return cpu.costUsd * benchmarkSockets(cpu); }
 export function benchmarkTdp(cpu: Cpu) { return cpu.tdpW * benchmarkSockets(cpu); }
-export function perfDollar(cpu: Cpu) { return specBase(cpu) / Math.max(1, benchmarkCost(cpu)); }
-export function perfWatt(cpu: Cpu) { return specBase(cpu) / Math.max(1, benchmarkTdp(cpu)); }
+export function perfDollar(cpu: Cpu) { return cpu.costUsd>0&&specBase(cpu)>0 ? specBase(cpu) / benchmarkCost(cpu) : 0; }
+export function perfWatt(cpu: Cpu) { return specBase(cpu)>0 ? specBase(cpu) / Math.max(1, benchmarkTdp(cpu)) : 0; }
 export function fmtMoney(v: number) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v); }
 export function normalize(v: number, min: number, max: number) { return max === min ? 60 : Math.round(20 + ((v - min) / (max - min)) * 80); }
