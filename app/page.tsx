@@ -30,7 +30,7 @@ export default function Page() {
   const [sortBy, setSortBy] = useState("score");
   const [leftSku, setLeftSku] = useState("");
   const [rightSku, setRightSku] = useState("");
-  const [showCompare, setShowCompare] = useState(false);
+  const [thirdSku, setThirdSku] = useState("");
   const compareRef = useRef<HTMLDivElement>(null);
   const [deal, setDeal] = useState<DealConfig>({customer:"",opportunity:"",serverQty:1,socketsPerServer:2});
 
@@ -46,7 +46,7 @@ export default function Page() {
   const closest = !top ? closestCompatible(cpuCatalog,filters,deal) : [];
   const relaxFilters=()=>{const next={...filters,minAvgCores:0,maxTdp:400,minSpec:0,coreKind:"all" as const,segment:"all" as const};setFilters(next);setPending(next)};
   const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
-  const openCompare=()=>{setShowCompare(true);window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),50)};
+  const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
 
 
   const exportDealSummary = () => {
@@ -108,7 +108,7 @@ export default function Page() {
       <RankPanels filtered={filtered} />
     </section>
     <div className="action-bar"><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div>
-    {showCompare&&<div ref={compareRef} className="compare-anchor"><CpuCompare pool={filtered} leftSku={leftSku || top?.sku || ""} rightSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} setLeftSku={setLeftSku} setRightSku={setRightSku} /><button className="close-compare" onClick={()=>setShowCompare(false)}>Close Comparison</button></div>}
+    <div ref={compareRef} className="compare-anchor"><CpuCompare pool={filtered} firstSku={leftSku || top?.sku || ""} secondSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} thirdSku={thirdSku} setFirstSku={setLeftSku} setSecondSku={setRightSku} setThirdSku={setThirdSku} /></div>
     <CpuTable filtered={filtered} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
