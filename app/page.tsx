@@ -22,7 +22,6 @@ import { CpuCompare } from "@/components/CpuCompare";
 import { DealConfiguration } from "@/components/DealConfiguration";
 import { DealWarnings } from "@/components/DealWarnings";
 import { WhyNot } from "@/components/WhyNot";
-import { NoExactMatch } from "@/components/NoExactMatch";
 
 export default function Page() {
   const [pending, setPending] = useState<Filters>(defaultFilters);
@@ -96,7 +95,6 @@ export default function Page() {
       <div style={{ display: "grid", gap: 6 }}>
         <Recommendation top={top} filters={filters} pool={displayPool} deal={deal} onCompare={openCompare} />
         <CompatibilitySummary top={top} filters={filters} deal={deal} />
-        {!top&&<NoExactMatch items={closest} deal={deal} onRelax={relaxFilters} />}
         <CommercialAlternatives filtered={displayPool} top={top} filters={filters} />
         <DealWarnings top={top} filtered={displayPool} filters={filters} deal={deal} />
       </div>
