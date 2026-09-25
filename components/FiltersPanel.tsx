@@ -13,7 +13,7 @@ export function FiltersPanel({pending,setPending,setFilters,deal}:{pending:Filte
  <div className="preset-grid"><button style={presetStyle("performance")} onClick={()=>preset({workload:"hpc-ai",segment:"all",tceOnly:false,maxTdp:400})}>Performance</button><button style={presetStyle("value")} onClick={()=>preset({workload:"any",segment:"all",tceOnly:false,maxTdp:400})}>Value</button><button style={presetStyle("tce")} onClick={()=>preset({workload:"any",segment:"all",tceOnly:true,maxTdp:400})}>TCE</button><button style={presetStyle("efficiency")} onClick={()=>preset({workload:"storage",segment:"all",tceOnly:false,maxTdp:250})}>Efficiency</button></div>
  <Select label="Optimize Choice" value={pending.workload} onChange={v=>setPending({...pending,workload:v as Workload})} opts={[["any","Optimize Choice"],["database","Database & Analytics"],["hpc-ai","HPC / AI"],["web","Web & Microservices"],["cloud","Cloud Native"],["storage","Infrastructure & Storage"]]}/>
  <Select label="System" value={pending.system} onChange={v=>{const sys=v as SystemModel;setPending({...pending,system:sys,coreKind:"all",segment:"all",tceOnly:false,sku:"all",family:"all",scalability:"all"})}} opts={Object.entries(systems).filter(([v])=>v!=="any").map(([v,x])=>[v,x.label])}/>
- <details className="advanced-filters" open><summary>Advanced Filters</summary><div style={{fontSize:10,color:"#18a8ff",fontWeight:800,letterSpacing:.5,margin:"8px 0 5px"}}>CPU SELECTION</div>
+ <div style={{fontSize:10,color:"#18a8ff",fontWeight:800,letterSpacing:.5,margin:"8px 0 5px"}}>CPU SELECTION</div>
  <Select label="CPU SKU" value={pending.sku} onChange={v=>setPending({...pending,sku:v})} opts={[["all","Any compatible CPU"] as [string,string,string?],...skuOptions]}/>
  <div style={{fontSize:9,color:"#7890a2",margin:"-4px 0 7px 0"}}>Only CPUs with a validated Lenovo SPECint2017 result are available. Selecting a CPU and applying filters makes it the recommendation.</div>
  <Select label="CPU Family" value={pending.family} onChange={v=>setPending({...pending,family:v,sku:"all"})} opts={[["all","All CPU Families"],...families.map(f=>[f,f])]}/>
@@ -24,7 +24,7 @@ export function FiltersPanel({pending,setPending,setFilters,deal}:{pending:Filte
  <Select label="Core Type" value={pending.coreKind} onChange={v=>setPending({...pending,coreKind:v as Filters["coreKind"]})} opts={[["all","All Core Types"],...(hasP&&available({coreKind:"p"})?[["p","P-Cores only"]]:[]),...(hasE&&available({coreKind:"e"})?[["e","E-Cores only"]]:[])]}/>
  <Select label="Top Choice Express" value={pending.tceOnly?"tce":"all"} onChange={v=>setPending({...pending,tceOnly:v==="tce"})} opts={[["all","All CPUs"],["tce","TCE only"]]}/>
  <Select label="Segment" value={pending.segment} onChange={v=>setPending({...pending,segment:v as Filters["segment"]})} opts={[["all","All Segments"],...segments.filter(s=>available({segment:s})).map(s=>[s,`${s} CPU`])]}/>
- <div style={{fontSize:10,color:"#7890a2",margin:"4px 0 8px"}}>CPU socket requirement comes from Deal Configuration.</div></details>
+ <div style={{fontSize:10,color:"#7890a2",margin:"4px 0 8px"}}>CPU socket requirement comes from Deal Configuration.</div>
  <button className="action-feedback-button" onClick={()=>setFilters(pending)}><span className="button-label">Apply Filters</span><span className="button-working">Applying...</span></button>
  </div></Panel>
 }
