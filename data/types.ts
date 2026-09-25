@@ -1,4 +1,4 @@
-export type Segment = "Extended" | "Mainstream" | "Specialised" | "TCE";
+export type Segment = "Extended" | "Mainstream" | "Specialised";
 export type CoreType = "P-Cores" | "E-Cores";
 export type Workload = "any" | "hpc-ai" | "database" | "web" | "cloud" | "storage";
 export type SystemModel = "any" | "st50-v3" | "sr250-v3" | "sr630-v4" | "sr650-v4" | "sr680a-v4" | "sr850-v4" | "sr860-v4";
