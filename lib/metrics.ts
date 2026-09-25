@@ -7,7 +7,8 @@ export function totalTdp(cpu: Cpu) { return cpu.tdpW * socketCount(cpu); }
 export function pCores(cpu: Cpu) { return cpu.coreType === "P-Cores" ? cpu.cores : 0; }
 export function eCores(cpu: Cpu) { return cpu.coreType === "E-Cores" ? cpu.cores : 0; }
 export function avgCores(cpu: Cpu) { return cpu.cores; }
-export function perfDollar(cpu: Cpu) { return cpu.specInt2017 / Math.max(1, totalCost(cpu)); }
-export function perfWatt(cpu: Cpu) { return cpu.specInt2017 / Math.max(1, totalTdp(cpu)); }
+export function perCpuSpec(cpu: Cpu) { return cpu.specInt2017 / socketCount(cpu); }
+export function perfDollar(cpu: Cpu) { return perCpuSpec(cpu) / Math.max(1, cpu.costUsd); }
+export function perfWatt(cpu: Cpu) { return perCpuSpec(cpu) / Math.max(1, cpu.tdpW); }
 export function fmtMoney(v: number) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v); }
 export function normalize(v: number, min: number, max: number) { return max === min ? 60 : Math.round(20 + ((v - min) / (max - min)) * 80); }
