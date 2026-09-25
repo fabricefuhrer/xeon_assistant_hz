@@ -27,6 +27,7 @@ export default function Page() {
   const [pending, setPending] = useState<Filters>(defaultFilters);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [sortBy, setSortBy] = useState("score");
+  const [busy, setBusy] = useState(false);
   const [leftSku, setLeftSku] = useState("");
   const [rightSku, setRightSku] = useState("");
   const [thirdSku, setThirdSku] = useState("");
@@ -46,7 +47,8 @@ export default function Page() {
   const selectedCpu = filters.sku!=="all" ? cpuCatalog.find(cpu=>cpu.sku===filters.sku && allowedByFilters(cpu,filters,deal)) || null : null;
   const top: Cpu | null = selectedCpu || displayPool[0] || null;
   const topPerformance = [...displayPool].sort((a, b) => specBase(b) - specBase(a)).slice(0, 5);
-  const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
+  const runBusy=(fn:()=>void)=>{setBusy(true);window.setTimeout(()=>{fn();window.setTimeout(()=>setBusy(false),350)},120)};
+  const openCompare=()=>runBusy(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}));
 
 
   const exportDealSummary = () => {
@@ -90,9 +92,10 @@ export default function Page() {
 
   return <main className="dashboard-shell">
     <Header />
+    <div className={`activity-orb ${busy?"busy":""}`} title={busy?"Xeon Assistant is processing":"Xeon Assistant ready"} aria-label={busy?"Processing":"Ready"} />
     <DealConfiguration deal={deal} setDeal={setDeal} filters={filters} />
     <section className="dashboard-fixed">
-      <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} deal={deal} />
+      <FiltersPanel pending={pending} setPending={setPending} setFilters={(f)=>runBusy(()=>setFilters(f))} deal={deal} />
       <div style={{ display: "grid", gap: 6 }}>
         <Recommendation top={top} filters={filters} pool={displayPool} deal={deal} onCompare={openCompare} />
         <CompatibilitySummary top={top} filters={filters} deal={deal} />
