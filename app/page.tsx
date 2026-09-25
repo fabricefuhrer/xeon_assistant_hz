@@ -5,7 +5,7 @@ import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
 import { allowedByFilters, bestFallback } from "@/lib/compatibility";
-import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, perCpuSpec, totalCores, totalCost, totalTdp } from "@/lib/metrics";
+import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, benchmarkSockets, totalCores, totalCost, totalTdp } from "@/lib/metrics";
 import { recommendationReasons, scoreBreakdown, scoreCpu, workloadLabel } from "@/lib/scoring";
 import { systems } from "@/data/systems";
 import { Header } from "@/components/Header";
@@ -38,20 +38,20 @@ export default function Page() {
     if (sortBy === "value") return perfDollar(b) - perfDollar(a);
     if (sortBy === "efficiency") return perfWatt(b) - perfWatt(a);
     if (sortBy === "price") return totalCost(a) - totalCost(b);
-    return perCpuSpec(b) - perCpuSpec(a);
+    return b.specInt2017 - a.specInt2017;
   }), [filters, sortBy, deal]);
 
   const fallback = filtered.length ? null : bestFallback(cpuCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
   const displayPool = filtered.length ? filtered : (fallback ? [fallback] : []);
   const top: Cpu | null = displayPool[0] || null;
-  const topPerformance = [...displayPool].sort((a, b) => perCpuSpec(b) - perCpuSpec(a)).slice(0, 5);
+  const topPerformance = [...displayPool].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
   const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
 
 
   const exportDealSummary = () => {
     if (!top) return;
     const q = scoreBreakdown(top, filtered);
-    const lines = ["Xeon Deal Assistant - Recommendation Summary", "", `Customer: ${deal.customer || "-"}`, `Opportunity: ${deal.opportunity || "-"}`, `Servers: ${deal.serverQty}`, `CPUs / Server: ${deal.socketsPerServer}`, `Total CPU Qty: ${deal.serverQty * deal.socketsPerServer}`, "", `System: ${systems[filters.system].label}`, `Workload: ${workloadLabel(filters.workload)}`, `Recommended CPU: Xeon ${top.sku}`, `Segment: ${top.segment}`, `Cores / CPU: ${top.cores}`, `Max Turbo: ${top.maxTurboGHz} GHz`, `TDP / CPU: ${top.tdpW} W`, `SPECint2017: ${top.specInt2017}`, `Intel RCP / Unit: ${fmtMoney(top.costUsd)}`, `Total Intel RCP Investment: ${fmtMoney(top.costUsd * deal.serverQty * deal.socketsPerServer)}`, "", `Performance: ${q.performance}`, `Value: ${q.value}`, `Efficiency: ${q.efficiency}`, `Turbo: ${q.turbo}`, "", "Why this CPU:", ...recommendationReasons(top, filters).map(x => `- ${x}`)];
+    const lines = ["Xeon Deal Assistant - Recommendation Summary", "", `Customer: ${deal.customer || "-"}`, `Opportunity: ${deal.opportunity || "-"}`, `Servers: ${deal.serverQty}`, `CPUs / Server: ${deal.socketsPerServer}`, `Total CPU Qty: ${deal.serverQty * deal.socketsPerServer}`, "", `System: ${systems[filters.system].label}`, `Workload: ${workloadLabel(filters.workload)}`, `Recommended CPU: Xeon ${top.sku}`, `Segment: ${top.segment}`, `Cores / CPU: ${top.cores}`, `Max Turbo: ${top.maxTurboGHz} GHz`, `TDP / CPU: ${top.tdpW} W`, `SPECint2017: ${top.specInt2017} (${benchmarkSockets(top)}S benchmark config)`, `Intel RCP / Unit: ${fmtMoney(top.costUsd)}`, `Total Intel RCP Investment: ${fmtMoney(top.costUsd * deal.serverQty * deal.socketsPerServer)}`, "", `Performance: ${q.performance}`, `Value: ${q.value}`, `Efficiency: ${q.efficiency}`, `Turbo: ${q.turbo}`, "", "Why this CPU:", ...recommendationReasons(top, filters).map(x => `- ${x}`)];
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download=`xeon-deal-${top.sku}.txt`; a.click(); URL.revokeObjectURL(url);
   };
 
@@ -64,7 +64,7 @@ export default function Page() {
     doc.setFontSize(18);doc.setFont("helvetica","bold");doc.text("Xeon Deal Assistant",16,y);y+=8;doc.setFontSize(10);doc.setTextColor(80);doc.text("Deal Recommendation Summary",16,y);doc.setTextColor(0);y+=12;
     line("Customer",deal.customer||"-");line("Opportunity",deal.opportunity||"-");line("System",systems[filters.system].label);line("Workload",workloadLabel(filters.workload));line("Servers",String(deal.serverQty));line("CPUs / Server",String(deal.socketsPerServer));line("Total CPU Qty",String(qty));y+=3;
     doc.setFontSize(14);doc.setFont("helvetica","bold");doc.text(`Recommended: Intel Xeon ${top.sku}`,16,y);y+=9;doc.setFontSize(10);
-    line("Segment",top.segment);line("Core Type",top.coreType);line("Cores / CPU",String(top.cores));line("Max Turbo",`${top.maxTurboGHz} GHz`);line("TDP / CPU",`${top.tdpW} W`);line("SPECint2017",top.specInt2017.toLocaleString());line("Intel RCP / Unit",fmtMoney(top.costUsd));line("Intel RCP Investment",fmtMoney(top.costUsd*qty));y+=4;
+    line("Segment",top.segment);line("Core Type",top.coreType);line("Cores / CPU",String(top.cores));line("Max Turbo",`${top.maxTurboGHz} GHz`);line("TDP / CPU",`${top.tdpW} W`);line("SPECint2017",`${top.specInt2017.toLocaleString()} (${benchmarkSockets(top)}S benchmark config)`);line("Intel RCP / Unit",fmtMoney(top.costUsd));line("Intel RCP Investment",fmtMoney(top.costUsd*qty));y+=4;
     doc.setFont("helvetica","bold");doc.text("Recommendation quality",16,y);y+=7;doc.setFont("helvetica","normal");doc.text(`Performance: ${q.performance}   Value: ${q.value}   Efficiency: ${q.efficiency}   Turbo: ${q.turbo}`,16,y);y+=10;
     doc.setFont("helvetica","bold");doc.text("Why this CPU?",16,y);y+=7;doc.setFont("helvetica","normal");recommendationReasons(top,filters).forEach(reason=>{const lines=doc.splitTextToSize(`- ${reason}`,175);doc.text(lines,16,y);y+=lines.length*5+2});
     const alternatives=filtered.filter(x=>x.sku!==top.sku).slice(0,3);if(alternatives.length){y+=3;doc.setFont("helvetica","bold");doc.text("Other compatible options",16,y);y+=7;doc.setFont("helvetica","normal");alternatives.forEach(x=>{doc.text(`Xeon ${x.sku} | ${x.segment} | ${x.cores} cores | ${x.tdpW}W | ${fmtMoney(x.costUsd)}`,16,y);y+=6})}
@@ -72,7 +72,7 @@ export default function Page() {
     doc.save(`xeon-deal-${top.sku}.pdf`);
   };
 
-  const copyDealSummary = async () => { if(!top)return; const q=scoreBreakdown(top,filtered); const text=`Xeon Deal Assistant | ${deal.customer || "Customer"} | ${deal.opportunity || "Opportunity"} | ${deal.serverQty} servers x ${deal.socketsPerServer} CPUs | ${systems[filters.system].label} | ${workloadLabel(filters.workload)} | Recommended: Xeon ${top.sku} | ${top.cores} cores | ${top.tdpW}W | SPECint ${top.specInt2017} | ${fmtMoney(top.costUsd * deal.serverQty * deal.socketsPerServer)} CPU investment | Performance ${q.performance} | Value ${q.value} | Efficiency ${q.efficiency}`; await navigator.clipboard.writeText(text); };
+  const copyDealSummary = async () => { if(!top)return; const q=scoreBreakdown(top,filtered); const text=`Xeon Deal Assistant | ${deal.customer || "Customer"} | ${deal.opportunity || "Opportunity"} | ${deal.serverQty} servers x ${deal.socketsPerServer} CPUs | ${systems[filters.system].label} | ${workloadLabel(filters.workload)} | Recommended: Xeon ${top.sku} | ${top.cores} cores | ${top.tdpW}W | SPECint ${top.specInt2017} (${benchmarkSockets(top)}S config) | ${fmtMoney(top.costUsd * deal.serverQty * deal.socketsPerServer)} CPU investment | Performance ${q.performance} | Value ${q.value} | Efficiency ${q.efficiency}`; await navigator.clipboard.writeText(text); };
 
   const exportExcel = () => {
     const headers = ["Rank", "SKU", "Family", "Codename", "Core Type", "P-Cores", "E-Cores", "Avg Cores (P+E)", "Total Cores", "Max Turbo (GHz)", "Base (GHz)", "Cache (MB)", "TDP (W)", "Total TDP", "Chips", "SPECint2017", "Perf / $", "Perf / Watt", "Intel RCP / Unit (USD)", "Catalog Config RCP (USD)", "Max Scalability", "Segment", "Score"];
