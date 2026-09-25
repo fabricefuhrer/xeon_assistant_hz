@@ -14,6 +14,6 @@ export type DealConfig = { customer: string; opportunity: string; serverQty: num
 export type Filters = {
   workload: Workload; system: SystemModel; minAvgCores: number;
   maxTdp: number; minSpec: number; coreKind: "all" | "p" | "e";
-  segment: "all" | Segment;
+  segment: "all" | Segment; tceOnly: boolean;
   sku: string; family: string; maxRcp: number; scalability: "all" | "1S" | "2S" | "4S";
 };
