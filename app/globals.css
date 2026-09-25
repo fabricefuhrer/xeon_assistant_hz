@@ -6,3 +6,4 @@
 .compare-grid{display:grid;grid-template-columns:minmax(110px,.7fr) repeat(3,minmax(160px,1fr));gap:8px;align-items:center}.compare-row{font-size:11px;padding:5px 0;border-top:1px solid rgba(97,145,175,.15)}.compare-row span{text-align:center}.compare-empty{color:#52697b}@media(max-width:980px){.compare-grid{grid-template-columns:100px repeat(3,minmax(130px,1fr));min-width:560px}.compare-anchor{overflow:auto}}
 .deal-capacity a{font-size:9px;color:#18a8ff;text-decoration:none;margin-top:2px}.deal-capacity a:hover{text-decoration:underline}
 .fallback-note{margin-top:6px;padding:7px 10px;border:1px solid #8a6b25;border-radius:6px;background:rgba(138,107,37,.1);color:#ffd27a;font-size:11px}
+.preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden}.preset-grid>button{width:100%;min-width:0;max-width:100%;overflow:hidden}
