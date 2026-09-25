@@ -6,7 +6,7 @@ export type SystemModel = "any" | "st50-v3" | "sr250-v3" | "sr630-v4" | "sr650-v
 export type Cpu = {
   sku: string; family: string; codename: string; coreType: CoreType; cores: number;
   maxTurboGHz: number; baseGHz: number; cacheMB: number; tdpW: number; costUsd: number;
-  chips: number; specInt2017: number; maxScalability: string; segment: Segment;
+  chips: number; specInt2017: number; maxScalability: string; segment: Segment; tce: boolean;
 };
 
 export type DealConfig = { customer: string; opportunity: string; serverQty: number; socketsPerServer: 1 | 2 | 4 };
