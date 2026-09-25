@@ -13,5 +13,5 @@ export const systems: Record<SystemModel, { label: string; maxSockets: number; a
 
 export const defaultFilters: Filters = {
   workload: "any", system: "sr650-v4", minAvgCores: 4,
-  maxTdp: 400, minSpec: 0, coreKind: "all", segment: "TCE", sku: "all", family: "all", maxRcp: 25000, scalability: "all"
+  maxTdp: 400, minSpec: 0, coreKind: "all", segment: "all", tceOnly: true, sku: "all", family: "all", maxRcp: 25000, scalability: "all"
 };
