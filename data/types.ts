@@ -9,8 +9,10 @@ export type Cpu = {
   chips: number; specInt2017: number; maxScalability: string; segment: Segment;
 };
 
+export type DealConfig = { customer: string; opportunity: string; serverQty: number; socketsPerServer: 1 | 2 | 4 };
+
 export type Filters = {
-  workload: Workload; system: SystemModel; maxBudget: number; minAvgCores: number;
+  workload: Workload; system: SystemModel; minAvgCores: number;
   maxTdp: number; minSpec: number; coreKind: "all" | "p" | "e";
   segment: "all" | Segment; scalability: "any" | "1S" | "2S" | "4S";
   socket: "any" | "1" | "2" | "4";
