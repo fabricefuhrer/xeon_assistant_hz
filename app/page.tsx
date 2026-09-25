@@ -43,7 +43,8 @@ export default function Page() {
 
   const fallback = filtered.length ? null : bestFallback(cpuCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
   const displayPool = filtered.length ? filtered : (fallback ? [fallback] : []);
-  const top: Cpu | null = displayPool[0] || null;
+  const selectedCpu = filters.sku!=="all" ? cpuCatalog.find(cpu=>cpu.sku===filters.sku && allowedByFilters(cpu,filters,deal)) || null : null;
+  const top: Cpu | null = selectedCpu || displayPool[0] || null;
   const topPerformance = [...displayPool].sort((a, b) => specBase(b) - specBase(a)).slice(0, 5);
   const openCompare=()=>window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),20);
 
