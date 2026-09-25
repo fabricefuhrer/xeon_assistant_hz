@@ -17,6 +17,7 @@ import { RadarPanel } from "@/components/RadarPanel";
 import { RankPanels } from "@/components/RankPanels";
 import { CpuTable } from "@/components/CpuTable";
 import { Footer } from "@/components/Footer";
+import { CpuCompare } from "@/components/CpuCompare";
 
 export default function Page() {
   const [pending, setPending] = useState<Filters>(defaultFilters);
@@ -33,6 +34,7 @@ export default function Page() {
 
   const top: Cpu | null = filtered.length ? filtered[0] : null;
   const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
+  const compareAlternative = filtered.find(cpu => cpu.sku !== top?.sku) || null;
 
   const exportExcel = () => {
     const headers = ["Rank", "SKU", "Family", "Codename", "Core Type", "P-Cores", "E-Cores", "Avg Cores (P+E)", "Total Cores", "Max Turbo (GHz)", "Base (GHz)", "Cache (MB)", "TDP (W)", "Total TDP", "Chips", "SPECint2017", "Perf / $", "Perf / Watt", "CPU Price (USD)", "System Price (USD)", "Max Scalability", "Segment", "Score"];
@@ -62,6 +64,7 @@ export default function Page() {
       </div>
       <RankPanels filtered={filtered} />
     </section>
+    <CpuCompare recommended={top} alternative={compareAlternative} />
     <CpuTable filtered={filtered} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
