@@ -1,5 +1,5 @@
 import type { Cpu, Filters, SystemModel } from "@/data/types";
-import { avgCores, maxSocketCount, totalCost } from "./metrics";
+import { avgCores, maxSocketCount } from "./metrics";
 import { systems } from "@/data/systems";
 
 const entrySystems: SystemModel[] = ["st50-v3", "sr250-v3"];
@@ -23,7 +23,6 @@ export function allowedByFilters(cpu: Cpu, filters: Filters) {
   if (!systemCompatible(cpu, filters)) return false;
   const system = systems[filters.system];
   if (system.maxTdp && cpu.tdpW > system.maxTdp) return false;
-  if (totalCost(cpu) > filters.maxBudget) return false;
   if (avgCores(cpu) < filters.minAvgCores) return false;
   if (cpu.tdpW > filters.maxTdp) return false;
   if (cpu.specInt2017 < filters.minSpec) return false;
