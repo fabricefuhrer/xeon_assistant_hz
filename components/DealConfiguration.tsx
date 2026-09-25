@@ -8,6 +8,6 @@ export function DealConfiguration({deal,setDeal,filters}:{deal:DealConfig;setDea
  <label><span>Opportunity</span><input value={deal.opportunity} placeholder="Optional" onChange={e=>setDeal({...deal,opportunity:e.target.value})}/></label>
  <label><span>Servers</span><input type="number" min={1} value={deal.serverQty} onChange={e=>setDeal({...deal,serverQty:Math.max(1,Number(e.target.value)||1)})}/></label>
  <label><span>CPUs / Server</span><select value={shown} onChange={e=>change(Number(e.target.value) as 1|2|4)}>{[1,2,4].filter(x=>x<=max).map(x=><option key={x} value={x}>{x}</option>)}</select></label>
- <div className="deal-capacity">{systems[filters.system].label}<b>MAX {max} CPU{max>1?"s":""}</b></div>
+ <div className="deal-capacity"><span>{systems[filters.system].label}</span><b>MAX {max} CPU{max>1?"s":""}</b>{systems[filters.system].lenovoPress&&<a href={systems[filters.system].lenovoPress} target="_blank" rel="noreferrer">Lenovo Press ↗</a>}</div>
  </div></Panel>
 }
