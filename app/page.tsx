@@ -6,7 +6,8 @@ import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
 import { allowedByFilters } from "@/lib/compatibility";
 import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, totalCores, totalCost, totalTdp } from "@/lib/metrics";
-import { scoreCpu } from "@/lib/scoring";
+import { recommendationReasons, scoreBreakdown, scoreCpu, workloadLabel } from "@/lib/scoring";
+import { systems } from "@/data/systems";
 import { Header } from "@/components/Header";
 import { FiltersPanel } from "@/components/FiltersPanel";
 import { KeyMetrics } from "@/components/KeyMetrics";
@@ -23,6 +24,8 @@ export default function Page() {
   const [pending, setPending] = useState<Filters>(defaultFilters);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [sortBy, setSortBy] = useState("score");
+  const [leftSku, setLeftSku] = useState("");
+  const [rightSku, setRightSku] = useState("");
 
   const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters)).sort((a, b) => {
     if (sortBy === "score") return scoreCpu(b, filters) - scoreCpu(a, filters);
@@ -34,7 +37,16 @@ export default function Page() {
 
   const top: Cpu | null = filtered.length ? filtered[0] : null;
   const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
-  const compareAlternative = filtered.find(cpu => cpu.sku !== top?.sku) || null;
+
+
+  const exportDealSummary = () => {
+    if (!top) return;
+    const q = scoreBreakdown(top, filtered);
+    const lines = ["Xeon Deal Assistant - Recommendation Summary", "", `System: ${systems[filters.system].label}`, `Workload: ${workloadLabel(filters.workload)}`, `Recommended CPU: Xeon ${top.sku}`, `Segment: ${top.segment}`, `Cores / CPU: ${top.cores}`, `Max Turbo: ${top.maxTurboGHz} GHz`, `TDP / CPU: ${top.tdpW} W`, `SPECint2017: ${top.specInt2017}`, `Configured CPU Price: ${fmtMoney(totalCost(top))}`, "", `Performance: ${q.performance}`, `Value: ${q.value}`, `Efficiency: ${q.efficiency}`, `Turbo: ${q.turbo}`, "", "Why this CPU:", ...recommendationReasons(top, filters).map(x => `- ${x}`)];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download=`xeon-deal-${top.sku}.txt`; a.click(); URL.revokeObjectURL(url);
+  };
+
+  const copyDealSummary = async () => { if(!top)return; const q=scoreBreakdown(top,filtered); const text=`Xeon Deal Assistant | ${systems[filters.system].label} | ${workloadLabel(filters.workload)} | Recommended: Xeon ${top.sku} | ${top.cores} cores | ${top.tdpW}W | SPECint ${top.specInt2017} | ${fmtMoney(totalCost(top))} | Performance ${q.performance} | Value ${q.value} | Efficiency ${q.efficiency}`; await navigator.clipboard.writeText(text); };
 
   const exportExcel = () => {
     const headers = ["Rank", "SKU", "Family", "Codename", "Core Type", "P-Cores", "E-Cores", "Avg Cores (P+E)", "Total Cores", "Max Turbo (GHz)", "Base (GHz)", "Cache (MB)", "TDP (W)", "Total TDP", "Chips", "SPECint2017", "Perf / $", "Perf / Watt", "CPU Price (USD)", "System Price (USD)", "Max Scalability", "Segment", "Score"];
@@ -54,7 +66,7 @@ export default function Page() {
     <section className="dashboard">
       <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} />
       <div style={{ display: "grid", gap: 6 }}>
-        <Recommendation top={top} filters={filters} />
+        <Recommendation top={top} filters={filters} pool={filtered} />
         <CompatibilitySummary top={top} filters={filters} />
         <CommercialAlternatives filtered={filtered} top={top} filters={filters} />
       </div>
@@ -64,7 +76,8 @@ export default function Page() {
       </div>
       <RankPanels filtered={filtered} />
     </section>
-    <CpuCompare recommended={top} alternative={compareAlternative} />
+    <div style={{display:"flex",justifyContent:"flex-end",gap:6,marginTop:6}}><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button></div>
+    <CpuCompare pool={filtered} leftSku={leftSku || top?.sku || ""} rightSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} setLeftSku={setLeftSku} setRightSku={setRightSku} />
     <CpuTable filtered={filtered} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
