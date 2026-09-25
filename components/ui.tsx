@@ -16,7 +16,7 @@ export function Stat({ label, value, accent = "#18a8ff", hint }: { label: string
 export function Mini({ label, value }: { label: string; value: string | number }) {
   return <div style={{ border: "1px solid #25445c", borderRadius: 6, padding: "8px 6px", textAlign: "center", background: "rgba(255,255,255,.03)" }}><div style={{ fontWeight: 900, fontSize: 16 }}>{value}</div><div style={{ fontSize: 10, marginTop: 4, color: "#d8e1e8" }}>{label}</div></div>;
 }
-export function Select({ label, value, onChange, opts }: { label: string; value: string; onChange: (v: string) => void; opts: string[][] }) {
+export function Select({ label, value, onChange, opts }: { label: string; value: string; onChange: (v: string) => void; opts: Array<[string,string,string?]> }) {
   return <div style={{ display: "grid", gridTemplateColumns: "1fr 1.65fr", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 12 }}><label>{label}</label><select value={value} onChange={e => onChange(e.target.value)} style={selectStyle}>{opts.map((row) => { const [v,l]=row; return  <option key={v} value={v} disabled={row[2]==="disabled"}>{l}</option>})}</select></div>;
 }
 export function EmptyState({ title, children }: { title: string; children: React.ReactNode }) {
