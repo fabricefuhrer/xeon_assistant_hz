@@ -3,6 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
+import { specResult } from "@/data/specResults";
 import { defaultFilters } from "@/data/systems";
 import { allowedByFilters, bestFallback } from "@/lib/compatibility";
 import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, benchmarkSockets, specBase, totalCores, totalCost, totalTdp } from "@/lib/metrics";
@@ -34,17 +35,18 @@ export default function Page() {
   const compareRef = useRef<HTMLDivElement>(null);
   const [deal, setDeal] = useState<DealConfig>({customer:"",opportunity:"",serverQty:1,socketsPerServer:2});
 
-  const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters, deal)).sort((a, b) => {
+  const specCatalog = useMemo(() => cpuCatalog.filter(cpu => Boolean(specResult(cpu.sku))), []);
+  const filtered = useMemo(() => specCatalog.filter(cpu => allowedByFilters(cpu, filters, deal)).sort((a, b) => {
     if (sortBy === "score") return scoreCpu(b, filters) - scoreCpu(a, filters);
     if (sortBy === "value") return perfDollar(b) - perfDollar(a);
     if (sortBy === "efficiency") return perfWatt(b) - perfWatt(a);
     if (sortBy === "price") return totalCost(a) - totalCost(b);
     return specBase(b) - specBase(a);
-  }), [filters, sortBy, deal]);
+  }), [filters, sortBy, deal, specCatalog]);
 
-  const fallback = filtered.length ? null : bestFallback(cpuCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
+  const fallback = filtered.length ? null : bestFallback(specCatalog,filters,deal,cpu=>scoreCpu(cpu,filters));
   const displayPool = filtered.length ? filtered : (fallback ? [fallback] : []);
-  const selectedCpu = filters.sku!=="all" ? cpuCatalog.find(cpu=>cpu.sku===filters.sku && allowedByFilters(cpu,filters,deal)) || null : null;
+  const selectedCpu = filters.sku!=="all" ? specCatalog.find(cpu=>cpu.sku===filters.sku && allowedByFilters(cpu,filters,deal)) || null : null;
   const top: Cpu | null = selectedCpu || displayPool[0] || null;
   const topPerformance = [...displayPool].sort((a, b) => specBase(b) - specBase(a)).slice(0, 5);
   const runBusy=(fn:()=>void)=>{setBusy(true);window.setTimeout(()=>{fn();window.setTimeout(()=>setBusy(false),350)},120)};
