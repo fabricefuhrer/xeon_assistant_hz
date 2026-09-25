@@ -32,6 +32,12 @@ export const lenovoSpecResults: Record<string, SpecResult> = {
 "6768P":{base:2480,enabledChips:4,system:"ThinkSystem SR850 V4",url:"https://www.spec.org/cpu2017/results/res2025q3/cpu2017-20250908-49446.html"},
 "6780E":{base:1130,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2024q3/cpu2017-20240909-44713.html"},
 "6781P":{base:743,enabledChips:1,system:"ThinkSystem SR650 V4",url:"https://www.spec.org/cpu2017/results/res2025q2/cpu2017-20250529-48375.html"},
-"6787P":{base:1520,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250210-46348.html"}
+"6787P":{base:1520,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250210-46348.html"},
+"6503P":{base:194,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2026q3/cpu2017-20260810-51864.html"},
+"6725P":{base:400,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://spec.org/cpu2017/results/res2026q2/cpu2017-20260406-51283.html"},
+"6730P":{base:724,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2025q2/cpu2017-20250407-47507.pdf"},
+"6732P":{base:774,enabledChips:2,system:"ThinkSystem SR650 V4",url:"https://www.spec.org/cpu2017/results/res2025q3/cpu2017-20250908-49430.html"},
+"6741P":{base:522,enabledChips:1,system:"ThinkSystem SR650 V4",url:"https://www.spec.org/cpu2017/results/res2025q3/cpu2017-20250714-49103.pdf"},
+"6747P":{base:1070,enabledChips:2,system:"ThinkSystem SR630 V4",url:"https://www.spec.org/cpu2017/results/res2025q2/cpu2017-20250407-47517.html"}
 };
 export const specResult=(sku:string)=>lenovoSpecResults[sku];
