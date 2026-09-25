@@ -1,10 +1,10 @@
 import type { Cpu } from "@/data/types";
-import { eCores, fmtMoney, pCores, perfDollar, perfWatt, maxSocketCount } from "@/lib/metrics";
+import { eCores, fmtMoney, pCores, perfDollar, perfWatt, maxSocketCount, perCpuSpec } from "@/lib/metrics";
 import { Panel, Stat, Title } from "./ui";
 
 export function KeyMetrics({ filtered }: { filtered: Cpu[] }) {
   const top = filtered[0] || null;
-  const bestPerf = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017)[0] || top;
+  const bestPerf = [...filtered].sort((a, b) => perCpuSpec(b) - perCpuSpec(a))[0] || top;
   const bestValue = [...filtered].sort((a, b) => perfDollar(b) - perfDollar(a))[0] || top;
   const mostP = [...filtered].sort((a, b) => pCores(b) - pCores(a))[0] || top;
   const mostE = [...filtered].sort((a, b) => eCores(b) - eCores(a))[0] || top;
@@ -14,5 +14,5 @@ export function KeyMetrics({ filtered }: { filtered: Cpu[] }) {
   const maxScalability = [...filtered].sort((a, b) => maxSocketCount(b) - maxSocketCount(a))[0] || top;
   const prices = filtered.map(c => c.costUsd);
   const priceRange = filtered.length ? `${fmtMoney(Math.min(...prices))} - ${fmtMoney(Math.max(...prices))}` : "-";
-  return <Panel><Title>Key Metrics</Title><div style={{ padding: "7px 14px 0", color: "#9fb0bd", fontSize: 12, lineHeight: 1.35 }}><b style={{ color: "#18a8ff" }}>Calculated from the current compatible CPU pool only.</b> Changing System, Workload, Core Type or Segment recalculates these values.</div><div className="stat-grid" style={{ padding: 12 }}><Stat label="Best Performance" value={bestPerf ? bestPerf.specInt2017.toLocaleString() : "-"} hint="SPECint2017" /><Stat label="Best Value" value={bestValue ? perfDollar(bestValue).toFixed(3) : "-"} accent="#39ff5f" hint="SPECint / $" /><Stat label="Most P-Cores" value={mostP ? pCores(mostP) : "-"} /><Stat label="Most E-Cores" value={mostE ? eCores(mostE) : "-"} /><Stat label="Lowest Power" value={lowestTdp ? `${lowestTdp.tdpW}W` : "-"} /><Stat label="Highest Turbo" value={highTurbo ? `${highTurbo.maxTurboGHz} GHz` : "-"} /><Stat label="Best Efficiency" value={efficient ? perfWatt(efficient).toFixed(2) : "-"} /><Stat label="Intel RCP Range" value={priceRange} /></div></Panel>;
+  return <Panel><Title>Key Metrics</Title><div style={{ padding: "7px 14px 0", color: "#9fb0bd", fontSize: 12, lineHeight: 1.35 }}><b style={{ color: "#18a8ff" }}>Calculated from the current compatible CPU pool only.</b> Changing System, Workload, Core Type or Segment recalculates these values.</div><div className="stat-grid" style={{ padding: 12 }}><Stat label="Best Performance" value={bestPerf ? Math.round(perCpuSpec(bestPerf)).toLocaleString() : "-"} hint="SPECint2017 / CPU" /><Stat label="Best Value" value={bestValue ? perfDollar(bestValue).toFixed(3) : "-"} accent="#39ff5f" hint="SPECint / $" /><Stat label="Most P-Cores" value={mostP ? pCores(mostP) : "-"} /><Stat label="Most E-Cores" value={mostE ? eCores(mostE) : "-"} /><Stat label="Lowest Power" value={lowestTdp ? `${lowestTdp.tdpW}W` : "-"} /><Stat label="Highest Turbo" value={highTurbo ? `${highTurbo.maxTurboGHz} GHz` : "-"} /><Stat label="Best Efficiency" value={efficient ? perfWatt(efficient).toFixed(2) : "-"} /><Stat label="Intel RCP Range" value={priceRange} /></div></Panel>;
 }
