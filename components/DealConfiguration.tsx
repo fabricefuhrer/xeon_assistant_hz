@@ -1,18 +1,13 @@
 "use client";
-import type { DealConfig,Filters } from "@/data/types";
-import { systems } from "@/data/systems";
-import { Panel } from "./ui";
+import type {DealConfig,Filters} from "@/data/types";import {systems} from "@/data/systems";import {Panel} from "./ui";
 export function DealConfiguration({deal,setDeal,filters}:{deal:DealConfig;setDeal:(d:DealConfig)=>void;filters:Filters}){
- const max=systems[filters.system].maxSockets;
- const actualSockets=Math.min(deal.socketsPerServer,max) as 1|2|4;
- const input={background:"#071724",border:"1px solid #25445c",borderRadius:4,color:"#fff",padding:"6px 8px",width:"100%",height:30};
- const setSockets=(n:1|2|4)=>setDeal({...deal,socketsPerServer:n});
- const setSystemSafeSockets=max<deal.socketsPerServer?max as 1|2|4:deal.socketsPerServer;
- return <Panel style={{marginBottom:6}}><div className="deal-config">
- <b className="deal-title">DEAL CONFIGURATION</b>
- <label>Customer<input style={input} value={deal.customer} placeholder="Optional" onChange={e=>setDeal({...deal,customer:e.target.value})}/></label>
- <label>Opportunity<input style={input} value={deal.opportunity} placeholder="Optional" onChange={e=>setDeal({...deal,opportunity:e.target.value})}/></label>
- <label>Servers<input style={input} type="number" min={1} value={deal.serverQty} onChange={e=>setDeal({...deal,serverQty:Math.max(1,Number(e.target.value)||1)})}/></label>
- <label>CPUs / Server<select style={input} value={setSystemSafeSockets} onChange={e=>setSockets(Number(e.target.value) as 1|2|4)}>{[1,2,4].filter(x=>x<=max).map(x=><option key={x} value={x}>{x} CPU{x>1?"s":""}</option>)}</select><span className="socket-hint">{systems[filters.system].label}: up to {max} CPU{max>1?"s":""}</span></label>
+ const max=systems[filters.system].maxSockets;const shown=Math.min(deal.socketsPerServer,max) as 1|2|4;
+ const change=(n:1|2|4)=>setDeal({...deal,socketsPerServer:n});
+ return <Panel style={{marginBottom:6}}><div className="deal-config-fixed"><b className="deal-title">DEAL CONFIGURATION</b>
+ <label><span>Customer</span><input value={deal.customer} placeholder="Optional" onChange={e=>setDeal({...deal,customer:e.target.value})}/></label>
+ <label><span>Opportunity</span><input value={deal.opportunity} placeholder="Optional" onChange={e=>setDeal({...deal,opportunity:e.target.value})}/></label>
+ <label><span>Servers</span><input type="number" min={1} value={deal.serverQty} onChange={e=>setDeal({...deal,serverQty:Math.max(1,Number(e.target.value)||1)})}/></label>
+ <label><span>CPUs / Server</span><select value={shown} onChange={e=>change(Number(e.target.value) as 1|2|4)}>{[1,2,4].filter(x=>x<=max).map(x=><option key={x} value={x}>{x}</option>)}</select></label>
+ <div className="deal-capacity">{systems[filters.system].label}<b>MAX {max} CPU{max>1?"s":""}</b></div>
  </div></Panel>
 }
