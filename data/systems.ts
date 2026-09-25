@@ -12,6 +12,6 @@ export const systems: Record<SystemModel, { label: string; maxSockets: number; a
 };
 
 export const defaultFilters: Filters = {
-  workload: "database", system: "sr650-v4", maxBudget: 15000, minAvgCores: 4,
+  workload: "database", system: "sr650-v4", minAvgCores: 4,
   maxTdp: 400, minSpec: 0, coreKind: "all", segment: "all", scalability: "any", socket: "any"
 };
