@@ -100,24 +100,26 @@ export default function Page() {
   return <main className="dashboard-shell">
     <Header />
     <div className={`activity-orb ${busy?"busy":""}`} title={busy?"Xeon Assistant is processing":"Xeon Assistant ready"} aria-label={busy?"Processing":"Ready"} />
-    <nav className="workflow-strip" aria-label="Sales Assist workflow"><span className="active">1 Configure</span><i>→</i><span>2 Recommend</span><i>→</i><span>3 Compare</span><i>→</i><span>4 Export</span></nav>
     <DealConfiguration deal={deal} setDeal={setDeal} filters={filters} />
-    <section className="sales-layout">
-      <aside className="sales-filters"><FiltersPanel pending={pending} setPending={setPending} setFilters={(f)=>runBusy(()=>setFilters(f))} deal={deal} /></aside>
-      <div className="sales-main">
+    <section className="dashboard-fixed">
+      <FiltersPanel pending={pending} setPending={setPending} setFilters={(f)=>runBusy(()=>setFilters(f))} deal={deal} />
+      <div style={{ display: "grid", gap: 6 }}>
         <Recommendation top={top} filters={filters} pool={displayPool} deal={deal} onCompare={openCompare} />
-        {fallback&&<div className="fallback-note">No exact filter match. Showing the closest compatible CPU for the selected platform and deal configuration.</div>}
-        <section className="decision-grid">
-          <div><CompatibilitySummary top={top} filters={filters} deal={deal} /><DealWarnings top={top} filtered={displayPool} filters={filters} deal={deal} /></div>
-          <div><KeyMetrics filtered={displayPool} /><WhyNot pool={displayPool} top={top} filters={filters} /></div>
-        </section>
-        <section className="alternatives-section"><CommercialAlternatives filtered={displayPool} top={top} filters={filters} /><RankPanels filtered={displayPool} /></section>
+        <CompatibilitySummary top={top} filters={filters} deal={deal} />
+        <CommercialAlternatives filtered={displayPool} top={top} filters={filters} />
+        <DealWarnings top={top} filtered={displayPool} filters={filters} deal={deal} />
       </div>
-      <aside className="sales-insights"><RadarPanel top={top} topPerformance={topPerformance} /></aside>
+      <div style={{ display: "grid", gap: 6 }}>
+        <KeyMetrics filtered={displayPool} />
+        <RadarPanel top={top} topPerformance={topPerformance} />
+        <WhyNot pool={displayPool} top={top} filters={filters} />
+      </div>
+      <RankPanels filtered={displayPool} />
     </section>
-    <div ref={compareRef} className="compare-anchor section-stage" data-stage="3 COMPARE"><CpuCompare pool={displayPool} firstSku={leftSku || top?.sku || ""} secondSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} thirdSku={thirdSku} setFirstSku={setLeftSku} setSecondSku={setRightSku} setThirdSku={setThirdSku} /></div>
-    <div className="export-stage section-stage" data-stage="4 EXPORT"><div className="action-bar"><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div></div>
-    <details className="technical-details"><summary>Technical evidence & full CPU ranking</summary><CpuTable filtered={displayPool} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} /></details>
+    {fallback&&<div className="fallback-note">No exact filter match. Showing the closest compatible CPU for the selected platform and deal configuration.</div>}
+    <div className="action-bar"><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div>
+    <div ref={compareRef} className="compare-anchor"><CpuCompare pool={displayPool} firstSku={leftSku || top?.sku || ""} secondSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} thirdSku={thirdSku} setFirstSku={setLeftSku} setSecondSku={setRightSku} setThirdSku={setThirdSku} /></div>
+    <CpuTable filtered={displayPool} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
 }
