@@ -7,3 +7,8 @@
 .deal-capacity a{font-size:9px;color:#18a8ff;text-decoration:none;margin-top:2px}.deal-capacity a:hover{text-decoration:underline}
 .fallback-note{margin-top:6px;padding:7px 10px;border:1px solid #8a6b25;border-radius:6px;background:rgba(138,107,37,.1);color:#ffd27a;font-size:11px}
 .preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden}.preset-grid>button{width:100%;min-width:0;max-width:100%;overflow:hidden}
+
+.compare-filter-button{width:100%;margin-top:8px;padding:9px;border:0;border-radius:4px;background:linear-gradient(180deg,#0878ff,#0758d8);color:#fff;font-weight:700}
+.activity-orb{position:fixed;right:18px;bottom:18px;z-index:9999;width:12px;height:12px;border-radius:50%;background:#31d158;box-shadow:0 0 0 3px rgba(49,209,88,.12),0 0 12px rgba(49,209,88,.55);transition:.18s ease}
+.activity-orb.busy{background:#0a84ff;box-shadow:0 0 0 3px rgba(10,132,255,.12),0 0 14px rgba(10,132,255,.7);animation:activityPulse 1s ease-in-out infinite}
+@keyframes activityPulse{0%,100%{transform:scale(.85);opacity:.55}50%{transform:scale(1.15);opacity:1}}
