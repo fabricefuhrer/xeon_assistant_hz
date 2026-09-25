@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
@@ -31,6 +31,7 @@ export default function Page() {
   const [leftSku, setLeftSku] = useState("");
   const [rightSku, setRightSku] = useState("");
   const [showCompare, setShowCompare] = useState(false);
+  const compareRef = useRef<HTMLDivElement>(null);
   const [deal, setDeal] = useState<DealConfig>({customer:"",opportunity:"",serverQty:1,socketsPerServer:2});
 
   const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters, deal)).sort((a, b) => {
@@ -45,6 +46,7 @@ export default function Page() {
   const closest = !top ? closestCompatible(cpuCatalog,filters,deal) : [];
   const relaxFilters=()=>{const next={...filters,minAvgCores:0,maxTdp:400,minSpec:0,coreKind:"all" as const,segment:"all" as const};setFilters(next);setPending(next)};
   const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
+  const openCompare=()=>{setShowCompare(true);window.setTimeout(()=>compareRef.current?.scrollIntoView({behavior:"smooth",block:"center"}),50)};
 
 
   const exportDealSummary = () => {
@@ -89,10 +91,10 @@ export default function Page() {
   return <main className="dashboard-shell">
     <Header />
     <DealConfiguration deal={deal} setDeal={setDeal} filters={filters} />
-    <section className="dashboard">
+    <section className="dashboard-fixed">
       <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} deal={deal} />
       <div style={{ display: "grid", gap: 6 }}>
-        <Recommendation top={top} filters={filters} pool={filtered} deal={deal} onCompare={()=>setShowCompare(v=>!v)} />
+        <Recommendation top={top} filters={filters} pool={filtered} deal={deal} onCompare={openCompare} />
         <CompatibilitySummary top={top} filters={filters} deal={deal} />
         {!top&&<NoExactMatch items={closest} deal={deal} onRelax={relaxFilters} />}
         <CommercialAlternatives filtered={filtered} top={top} filters={filters} />
@@ -105,8 +107,8 @@ export default function Page() {
       </div>
       <RankPanels filtered={filtered} />
     </section>
-    <div style={{display:"flex",justifyContent:"flex-end",gap:6,marginTop:6}}><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div>
-    {showCompare&&<CpuCompare pool={filtered} leftSku={leftSku || top?.sku || ""} rightSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} setLeftSku={setLeftSku} setRightSku={setRightSku} />}
+    <div className="action-bar"><button onClick={copyDealSummary} disabled={!top}>Copy Deal Summary</button><button onClick={exportDealSummary} disabled={!top}>Export Deal Summary</button><button onClick={exportPdf} disabled={!top}>Generate PDF</button></div>
+    {showCompare&&<div ref={compareRef} className="compare-anchor"><CpuCompare pool={filtered} leftSku={leftSku || top?.sku || ""} rightSku={rightSku || filtered.find(c=>c.sku!==top?.sku)?.sku || ""} setLeftSku={setLeftSku} setRightSku={setRightSku} /><button className="close-compare" onClick={()=>setShowCompare(false)}>Close Comparison</button></div>}
     <CpuTable filtered={filtered} sortBy={sortBy} setSortBy={setSortBy} exportExcel={exportExcel} />
     <Footer />
   </main>;
