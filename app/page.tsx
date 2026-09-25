@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import type { Cpu, DealConfig, Filters } from "@/data/types";
 import { cpuCatalog } from "@/data/cpus";
 import { defaultFilters } from "@/data/systems";
-import { allowedByFilters } from "@/lib/compatibility";
+import { allowedByFilters, closestCompatible } from "@/lib/compatibility";
 import { avgCores, eCores, fmtMoney, pCores, perfDollar, perfWatt, totalCores, totalCost, totalTdp } from "@/lib/metrics";
 import { recommendationReasons, scoreBreakdown, scoreCpu, workloadLabel } from "@/lib/scoring";
 import { systems } from "@/data/systems";
@@ -22,6 +22,7 @@ import { CpuCompare } from "@/components/CpuCompare";
 import { DealConfiguration } from "@/components/DealConfiguration";
 import { DealWarnings } from "@/components/DealWarnings";
 import { WhyNot } from "@/components/WhyNot";
+import { NoExactMatch } from "@/components/NoExactMatch";
 
 export default function Page() {
   const [pending, setPending] = useState<Filters>(defaultFilters);
@@ -32,15 +33,17 @@ export default function Page() {
   const [showCompare, setShowCompare] = useState(false);
   const [deal, setDeal] = useState<DealConfig>({customer:"",opportunity:"",serverQty:1,socketsPerServer:2});
 
-  const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters)).sort((a, b) => {
+  const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters, deal)).sort((a, b) => {
     if (sortBy === "score") return scoreCpu(b, filters) - scoreCpu(a, filters);
     if (sortBy === "value") return perfDollar(b) - perfDollar(a);
     if (sortBy === "efficiency") return perfWatt(b) - perfWatt(a);
     if (sortBy === "price") return totalCost(a) - totalCost(b);
     return b.specInt2017 - a.specInt2017;
-  }), [filters, sortBy]);
+  }), [filters, sortBy, deal]);
 
   const top: Cpu | null = filtered.length ? filtered[0] : null;
+  const closest = !top ? closestCompatible(cpuCatalog,filters,deal) : [];
+  const relaxFilters=()=>{const next={...filters,minAvgCores:0,maxTdp:400,minSpec:0,coreKind:"all" as const,segment:"all" as const};setFilters(next);setPending(next)};
   const topPerformance = [...filtered].sort((a, b) => b.specInt2017 - a.specInt2017).slice(0, 5);
 
 
@@ -70,10 +73,11 @@ export default function Page() {
     <Header />
     <DealConfiguration deal={deal} setDeal={setDeal} filters={filters} />
     <section className="dashboard">
-      <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} />
+      <FiltersPanel pending={pending} setPending={setPending} setFilters={setFilters} deal={deal} />
       <div style={{ display: "grid", gap: 6 }}>
         <Recommendation top={top} filters={filters} pool={filtered} deal={deal} onCompare={()=>setShowCompare(v=>!v)} />
-        <CompatibilitySummary top={top} filters={filters} />
+        <CompatibilitySummary top={top} filters={filters} deal={deal} />
+        {!top&&<NoExactMatch items={closest} deal={deal} onRelax={relaxFilters} />}
         <CommercialAlternatives filtered={filtered} top={top} filters={filters} />
         <DealWarnings top={top} filtered={filtered} filters={filters} deal={deal} />
       </div>
