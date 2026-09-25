@@ -30,7 +30,6 @@ export default function Page() {
   const [leftSku, setLeftSku] = useState("");
   const [rightSku, setRightSku] = useState("");
   const [showCompare, setShowCompare] = useState(false);
-  const [showRadar, setShowRadar] = useState(false);
   const [deal, setDeal] = useState<DealConfig>({customer:"",opportunity:"",serverQty:1,socketsPerServer:2});
 
   const filtered = useMemo(() => cpuCatalog.filter(cpu => allowedByFilters(cpu, filters)).sort((a, b) => {
@@ -80,7 +79,7 @@ export default function Page() {
       </div>
       <div style={{ display: "grid", gap: 6 }}>
         <KeyMetrics filtered={filtered} />
-        <button onClick={()=>setShowRadar(v=>!v)}>{showRadar?"Hide Performance Radar":"Show Performance Radar"}</button>{showRadar&&<RadarPanel top={top} topPerformance={topPerformance} />}
+<RadarPanel top={top} topPerformance={topPerformance} />
         <WhyNot pool={filtered} top={top} filters={filters} />
       </div>
       <RankPanels filtered={filtered} />
